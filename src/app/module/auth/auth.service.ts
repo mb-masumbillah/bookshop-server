@@ -1,6 +1,6 @@
 import { TUser } from '../user/user.interface'
 
-const registerUserIntoService = (payload: TUser) => {
+const registerUserIntoService = async (payload: TUser) => {
   return payload
 }
 

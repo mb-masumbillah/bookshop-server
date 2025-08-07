@@ -1,10 +1,19 @@
-import { Request, Response } from 'express'
 import { authService } from './auth.service'
+import { catchAsync } from '../../../utils/catchAsync'
+import { StatusCodes } from 'http-status-codes'
+import sendResponse from '../../../utils/sendResponse'
 
-const registerUser = async (req: Request, res: Response) => {
+const registerUser = catchAsync(async(req, res) => {
   const result = await authService.registerUserIntoService(req.body)
-  console.log(result)
-}
+  //   console.log(result)
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Register success',
+    data: result,
+  })
+})
 
 export const authController = {
   registerUser,
