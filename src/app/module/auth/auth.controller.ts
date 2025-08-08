@@ -5,7 +5,7 @@ import sendResponse from '../../../utils/sendResponse'
 
 const registerUser = catchAsync(async(req, res) => {
   const result = await authService.registerUserIntoService(req.body)
-  //   console.log(result)
+    
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
