@@ -3,8 +3,8 @@ import { catchAsync } from '../../../utils/catchAsync'
 import { StatusCodes } from 'http-status-codes'
 import sendResponse from '../../../utils/sendResponse'
 
-const registerUser = catchAsync(async(req, res) => {
-  const result = await authService.registerUserIntoService(req.body)
+const loginUser = catchAsync(async(req, res) => {
+  const result = await authService.loginUserIntoService(req.body)
     
 
   sendResponse(res, {
@@ -16,5 +16,5 @@ const registerUser = catchAsync(async(req, res) => {
 })
 
 export const authController = {
-  registerUser,
+ loginUser,
 }

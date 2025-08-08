@@ -1,24 +1,16 @@
-import { TUser } from '../user/user.interface'
+
 import { User } from '../user/user.model'
+import { TLoginUser } from './auth.interface'
 
-const registerUserIntoService = async (payload: TUser) => {
-  const user = await User.isUserExistsByCustomEmail(payload.email)
- 
-  if (!user) {
-    throw new Error('User dose not exist')
-  }
+const loginUserIntoService = async (payload: TLoginUser) => {
+  
 
-  if (user?.isDeleted) {
-    throw new Error('user is deleted')
-  }
+const user = await User.isUserExistsByCustomEmail({email: payload?.email})
 
-  if (user?.isActive === 'blocked') {
-    throw new Error('user is blocked')
-  }
 
-  return user
+  
 }
 
 export const authService = {
-  registerUserIntoService,
+loginUserIntoService,
 }

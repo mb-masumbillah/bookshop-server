@@ -8,7 +8,7 @@ const router = Router()
 router.post(
   '/register',
   validationRequest(userValidationSchema),
-  authController.registerUser,
+  authController.loginUser,
 )
 
 export const authRoute = router
