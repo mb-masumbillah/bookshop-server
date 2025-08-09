@@ -27,7 +27,7 @@ const otpStoreIntoDB = async (password: string, payload: TOtp) => {
     return { email: payload?.email }
   }
 
-  const result = await OTP.create(data)
+  await OTP.create(data)
 
   // Send OTP email
   try {
@@ -41,7 +41,6 @@ const otpStoreIntoDB = async (password: string, payload: TOtp) => {
 
   return {
     otpExpireInSeconds: otpExpireSeconds,
-    email: result?.email,
   }
 }
 
@@ -57,7 +56,7 @@ const resendOtpUpdateIntoDB = async (email: string) => {
 
   const updatedOtp = await OTP.findOneAndUpdate(
     { email },
-    { otp: otpCode, expireAt, createdAt: new Date() },
+    { $set: { otp: otpCode, expireAt, createdAt: new Date() } },
     { new: true },
   )
 

@@ -7,9 +7,9 @@ import config from '../../config'
 const otpSchema = new Schema<TOtp>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  otp: { type: String, required: true },
-  contactNumbar: { type: String, required: true },
+  contactNumbar: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  otp: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   expireAt: { type: Date, required: true },
 })

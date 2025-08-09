@@ -18,6 +18,7 @@ const createUserIntoDB = async (
   userData.password = password || (config.default_password as string)
   userData.role = 'user'
   userData.needsPasswordChange = false
+  userData.isEmailVerified = true
 
   const session = await mongoose.startSession()
 

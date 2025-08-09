@@ -5,7 +5,6 @@ export type TUser = {
   email: string
   password: string
   contactNumbar: string
-  isPhoneVerified: boolean
   isEmailVerified: boolean
   needsPasswordChange: boolean
   passwordChangedAt?: Date
