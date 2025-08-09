@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { StatusCodes } from 'http-status-codes'
 import { generateOTP } from '../../../utils/otp/generateOTP'
 import { TOtp } from './otp.interface'
@@ -6,34 +7,85 @@ import { User } from '../user/user.model'
 import { AppError } from '../../Error/AppError'
 import sendEmail from '../../../utils/otp/sendEmail'
 
-const otpStoreIntoDB = async (password: string, payload: TOtp) => {
-  const data: Partial<TOtp> = { ...payload }
+const otpExpireSeconds = 60
 
+const otpStoreIntoDB = async (password: string, payload: TOtp) => {
+  const data: Partial<TOtp> = { ...payload, password }
   const otpCode = generateOTP()
 
   data.otp = otpCode
-  data.password = password
+  data.expireAt = new Date(Date.now() + otpExpireSeconds * 1000)
 
   const user = await User.isUserExistsByCustomEmail(payload.email)
-
   if (user) {
-    throw new AppError(StatusCodes.CONFLICT, 'User is exist')
-  }
-  const otp = await OTP.findOne({ email: payload?.email })
-
-  if (otp) {
-    throw new AppError(StatusCodes.CONFLICT, 'Please , check you mail')
+    throw new AppError(StatusCodes.CONFLICT, 'User already exists')
   }
 
-  const otpData = await OTP.create(data)
+  const existingOtp = await OTP.findOne({ email: payload?.email })
 
-  if (!otpData) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'opt not create')
+  if (existingOtp) {
+    return { email: payload?.email }
   }
 
-  await sendEmail(payload?.email, otpCode)
+  const result = await OTP.create(data)
+
+  // Send OTP email
+  try {
+    await sendEmail(payload.name, payload.email, otpCode, otpExpireSeconds)
+  } catch (error) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to send OTP email',
+    )
+  }
+
+  return {
+    otpExpireInSeconds: otpExpireSeconds,
+    email: result?.email,
+  }
+}
+
+const resendOtpUpdateIntoDB = async (email: string) => {
+  const otpCode = generateOTP()
+  const expireAt = new Date(Date.now() + otpExpireSeconds * 1000)
+
+  const existingEmail = await OTP.findOne({ email })
+
+  if (!existingEmail) {
+    throw new AppError(StatusCodes.CONFLICT, 'Email is not exist')
+  }
+
+  const updatedOtp = await OTP.findOneAndUpdate(
+    { email },
+    { otp: otpCode, expireAt, createdAt: new Date() },
+    { new: true },
+  )
+
+  if (!updatedOtp) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'OTP not found for this email')
+  }
+
+  try {
+    await sendEmail(
+      updatedOtp.name,
+      updatedOtp.email,
+      otpCode,
+      otpExpireSeconds,
+    )
+  } catch (error) {
+    throw new AppError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to resend OTP email',
+    )
+  }
+
+  return {
+    otpExpireInSeconds: otpExpireSeconds,
+    email: updatedOtp?.email,
+  }
 }
 
 export const otpService = {
   otpStoreIntoDB,
+  resendOtpUpdateIntoDB,
 }

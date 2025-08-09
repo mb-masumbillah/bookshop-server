@@ -3,7 +3,9 @@ import { optController } from "./opt.controller";
 
 const router = Router()
 
-router.post('/verify-otp', optController.otp)
+router.post('/send-otp', optController.sendOTP)
+
+router.post('/resend-otp', optController.updateOtp)
 
 
 export const optRoute = router

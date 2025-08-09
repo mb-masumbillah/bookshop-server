@@ -5,4 +5,5 @@ export type TOtp = {
   password: string
   otp: string
   createdAt: Date
+  expireAt: Date
 }
