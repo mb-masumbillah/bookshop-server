@@ -1,7 +1,8 @@
 import { Router } from 'express'
 import { authController } from './auth.controller'
-import { validationRequest } from '../../../utils/validationRequest'
+
 import { userValidationSchema } from '../user/user.validation'
+import { validationRequest } from '../../../middleware/validationRequest'
 
 const router = Router()
 

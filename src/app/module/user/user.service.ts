@@ -8,14 +8,9 @@ import { OTP } from '../otp/otp.model'
 import mongoose from 'mongoose'
 import { createToken } from '../auth/auth.utils'
 
-const createUserIntoDB = async (
-  password: string,
-  payload: TUser,
-  otp: string,
-) => {
-  const userData: Partial<TUser> = { ...payload }
+const createUserIntoDB = async (mail: string, otp: string) => {
+  const userData: Partial<TUser> = {}
 
-  userData.password = password || (config.default_password as string)
   userData.role = 'user'
   userData.needsPasswordChange = false
   userData.isEmailVerified = true
@@ -26,9 +21,7 @@ const createUserIntoDB = async (
     session.startTransaction()
 
     // OTP খুঁজে নিন session এর সাথে
-    const existingOTP = await OTP.findOne({ email: payload?.email }).session(
-      session,
-    )
+    const existingOTP = await OTP.findOne({ email: mail }).session(session)
     if (!existingOTP) {
       throw new AppError(StatusCodes.NOT_FOUND, 'OTP not found for this email')
     }
@@ -45,21 +38,27 @@ const createUserIntoDB = async (
     }
 
     // User আগেই আছে কিনা চেক
-    const user = await User.isUserExistsByCustomEmail(payload?.email)
+    const user = await User.isUserExistsByCustomEmail(mail)
     if (user) {
       throw new AppError(StatusCodes.CONFLICT, 'User already exists')
     }
 
     // User create করুন session দিয়ে
+
+    const { name, contactNumbar, password, email } = existingOTP
+
+    userData.name = name
+    userData.contactNumbar = contactNumbar
+    userData.password = password
+    userData.email = email
+
     const newUser = await User.create([userData], { session })
     if (!newUser.length) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user')
     }
 
     // OTP ডিলিট করুন session দিয়ে
-    const deleteResult = await OTP.deleteMany({
-      email: payload?.email,
-    }).session(session)
+    const deleteResult = await OTP.deleteMany({ email }).session(session)
     if (deleteResult.deletedCount === 0) {
       throw new AppError(
         StatusCodes.INTERNAL_SERVER_ERROR,

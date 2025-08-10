@@ -1,5 +1,6 @@
 import { ZodObject } from 'zod'
-import { catchAsync } from './catchAsync'
+import { catchAsync } from '../utils/catchAsync'
+
 
 export const validationRequest = (schema: ZodObject) => {
   return catchAsync(async (req, res, next) => {
