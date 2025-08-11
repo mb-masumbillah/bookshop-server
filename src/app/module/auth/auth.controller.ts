@@ -13,7 +13,7 @@ const loginUser = catchAsync(async (req, res) => {
     httpOnly: true,
     sameSite: 'none',
     maxAge: 1000 * 60 * 60 * 24 * 365,
-  })
+  });
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
