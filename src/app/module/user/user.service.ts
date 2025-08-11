@@ -68,7 +68,7 @@ const createUserIntoDB = async (mail: string, otp: string) => {
 
     //create token and sent to the  client
     const jwtPayload = {
-      email: newUser[0]?.email,
+      user: newUser[0]?.email,
       role: newUser[0]?.role,
     }
 

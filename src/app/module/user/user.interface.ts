@@ -15,4 +15,9 @@ export type TUser = {
 
 export interface UserModel extends Model<TUser> {
   isUserExistsByCustomEmail(email: string): Promise<TUser>
+
+  isPasswordMatched(
+    plainTextPassword: string,
+    hashedPassword: string,
+  ): Promise<TUser>
 }
