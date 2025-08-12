@@ -57,6 +57,11 @@ const loginUserIntoService = async (payload: TLoginUser) => {
   }
 }
 
+const refreshToken = (token:string) =>{
+  console.log({token})
+}
+
 export const authService = {
   loginUserIntoService,
+  refreshToken
 }
