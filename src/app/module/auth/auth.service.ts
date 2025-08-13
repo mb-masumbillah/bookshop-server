@@ -5,6 +5,7 @@ import { TLoginUser } from './auth.interface'
 import { createToken, verifyToken } from './auth.utils'
 import config from '../../config'
 import { JwtPayload } from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 const loginUserIntoService = async (payload: TLoginUser) => {
   let user = null
@@ -58,10 +59,45 @@ const loginUserIntoService = async (payload: TLoginUser) => {
 }
 
 const changePassword = async (
-  user: JwtPayload,
+  userData: JwtPayload,
   payload: { oldPassword: string; newPassword: string },
 ) => {
-  console.log(user, payload)
+  const user = await User.isUserExistsByEmailOrNumber(userData?.email)
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'this is user is not exist')
+  }
+
+  if (user?.isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is deleted')
+  }
+
+  if (user?.isActive === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is blocked')
+  }
+
+  if (!(await User.isPasswordMatched(payload?.oldPassword, user?.password))) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'password do not match')
+  }
+
+  const newHashedPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.bcrypt_salt_rounds),
+  )
+
+  await User.findOneAndUpdate(
+    {
+      email: user?.email,
+      role: user?.role,
+    },
+    {
+      password: newHashedPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  )
+
+  return null
 }
 
 const refreshToken = async (token: string) => {
