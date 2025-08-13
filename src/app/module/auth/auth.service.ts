@@ -145,8 +145,13 @@ const refreshToken = async (token: string) => {
   }
 }
 
+const forgetPassword = async (email:string) =>{
+console.log(email)
+}
+
 export const authService = {
   loginUserIntoService,
   changePassword,
   refreshToken,
+  forgetPassword
 }
