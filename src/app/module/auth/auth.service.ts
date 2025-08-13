@@ -8,13 +8,14 @@ import config from '../../config'
 const loginUserIntoService = async (payload: TLoginUser) => {
   let user = null
 
-  if (payload?.email) {
-    user = await User.isUserExistsByCustomEmail(payload.email as string)
-  } else if (payload?.contactNumbar) {
-    user = await User.findOne({
-      contactNumbar: payload?.contactNumbar,
-    })
+  if (payload.email) {
+    user = await User.isUserExistsByEmailOrNumber(payload.email)
   }
+
+  if (payload?.contactNumbar) {
+    user = await User.isUserExistsByEmailOrNumber(payload.contactNumbar)
+  }
+
   if (!user) {
     throw new AppError(StatusCodes.CONFLICT, 'User is not exists')
   }
@@ -32,9 +33,7 @@ const loginUserIntoService = async (payload: TLoginUser) => {
   }
 
   const jwtPayload = {
-    user:
-      (user?.email && user?.email) ||
-      (user?.contactNumbar && user?.contactNumbar),
+    email: user?.email,
     role: user?.role,
   }
 
@@ -57,12 +56,14 @@ const loginUserIntoService = async (payload: TLoginUser) => {
   }
 }
 
+const changePassword = async () => {}
+
 const refreshToken = async (token: string) => {
   const decoded = verifyToken(token, config.jwt_refresh_secret as string)
 
-  const { user: email, iat } = decoded
+  const { email, iat } = decoded
 
-  const user = await User.isUserExistsByCustomEmail(email)
+  const user = await User.isUserExistsByEmailOrNumber(email)
 
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'user not exists')
@@ -87,7 +88,7 @@ const refreshToken = async (token: string) => {
   }
 
   const jwtPayload = {
-    user: user?.email,
+    email: user?.email,
     role: user?.role,
   }
 
@@ -102,9 +103,8 @@ const refreshToken = async (token: string) => {
   }
 }
 
-
-
 export const authService = {
   loginUserIntoService,
+  changePassword,
   refreshToken,
 }

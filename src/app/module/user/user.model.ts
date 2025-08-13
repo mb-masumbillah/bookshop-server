@@ -70,8 +70,12 @@ userSchema.post('save', function (doc, next) {
   next()
 })
 
-userSchema.statics.isUserExistsByCustomEmail = async function (email: string) {
-  return await User.findOne({ email }).select('+password')
+userSchema.statics.isUserExistsByEmailOrNumber = async function (
+  identifier: string,
+) {
+  return await this.findOne({
+    $or: [{ email: identifier }, { contactNumbar: identifier }],
+  }).select('+password')
 }
 
 userSchema.statics.isPasswordMatched = async function (

@@ -38,7 +38,7 @@ const createUserIntoDB = async (mail: string, otp: string) => {
     }
 
     // User আগেই আছে কিনা চেক
-    const user = await User.isUserExistsByCustomEmail(mail)
+    const user = await User.isUserExistsByEmailOrNumber(mail)
     if (user) {
       throw new AppError(StatusCodes.CONFLICT, 'User already exists')
     }
@@ -68,7 +68,7 @@ const createUserIntoDB = async (mail: string, otp: string) => {
 
     //create token and sent to the  client
     const jwtPayload = {
-      user: newUser[0]?.email,
+      email: newUser[0]?.email,
       role: newUser[0]?.role,
     }
 

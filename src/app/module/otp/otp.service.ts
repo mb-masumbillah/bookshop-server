@@ -16,7 +16,7 @@ const otpStoreIntoDB = async (password: string, payload: TOtp) => {
   data.otp = otpCode
   data.expireAt = new Date(Date.now() + otpExpireSeconds * 1000)
 
-  const user = await User.isUserExistsByCustomEmail(payload.email)
+  const user = await User.isUserExistsByEmailOrNumber(payload.email)
   if (user) {
     throw new AppError(StatusCodes.CONFLICT, 'User already exists')
   }

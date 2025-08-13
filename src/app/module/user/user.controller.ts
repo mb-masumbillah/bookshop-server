@@ -23,7 +23,6 @@ const createUser = catchAsync(async (req, res) => {
     message: 'user create success',
     data: {
       accessToken,
-      refreshToken,
       needsPasswordChange,
       user,
     },
