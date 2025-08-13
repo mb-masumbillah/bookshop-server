@@ -4,6 +4,7 @@ import { User } from '../user/user.model'
 import { TLoginUser } from './auth.interface'
 import { createToken, verifyToken } from './auth.utils'
 import config from '../../config'
+import { JwtPayload } from 'jsonwebtoken'
 
 const loginUserIntoService = async (payload: TLoginUser) => {
   let user = null
@@ -56,7 +57,12 @@ const loginUserIntoService = async (payload: TLoginUser) => {
   }
 }
 
-const changePassword = async () => {}
+const changePassword = async (
+  user: JwtPayload,
+  payload: { oldPassword: string; newPassword: string },
+) => {
+  console.log(user, payload)
+}
 
 const refreshToken = async (token: string) => {
   const decoded = verifyToken(token, config.jwt_refresh_secret as string)
