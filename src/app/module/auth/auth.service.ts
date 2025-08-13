@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { AppError } from '../../Error/AppError'
 import { User } from '../user/user.model'
 import { TLoginUser } from './auth.interface'
-import { createToken } from './auth.utils'
+import { createToken, verifyToken } from './auth.utils'
 import config from '../../config'
 
 const loginUserIntoService = async (payload: TLoginUser) => {
@@ -57,11 +57,54 @@ const loginUserIntoService = async (payload: TLoginUser) => {
   }
 }
 
-const refreshToken = (token:string) =>{
-  console.log({token})
+const refreshToken = async (token: string) => {
+  const decoded = verifyToken(token, config.jwt_refresh_secret as string)
+
+  const { user: email, iat } = decoded
+
+  const user = await User.isUserExistsByCustomEmail(email)
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'user not exists')
+  }
+
+  if (user?.isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is deleted')
+  }
+
+  if (user?.isActive === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is blocked')
+  }
+
+  if (
+    user?.passwordChangedAt &&
+    User.isJWTIssuedBeforePasswordChanged(
+      user?.passwordChangedAt,
+      iat as number,
+    )
+  ) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'you are not authorizated !')
+  }
+
+  const jwtPayload = {
+    user: user?.email,
+    role: user?.role,
+  }
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  )
+
+  return {
+    accessToken,
+  }
 }
+
+
 
 export const authService = {
   loginUserIntoService,
-  refreshToken
+  refreshToken,
 }
