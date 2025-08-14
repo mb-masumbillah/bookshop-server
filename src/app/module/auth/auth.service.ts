@@ -185,12 +185,17 @@ const forgetPassword = async (email: string) => {
   sendEmail(sendEmailData)
 }
 
-
-
+const resetPasswrod = async(
+  token: string,
+  payload: { email: string; newPassword: string },
+) => {
+  console.log(token, payload)
+}
 
 export const authService = {
   loginUserIntoService,
   changePassword,
   refreshToken,
   forgetPassword,
+  resetPasswrod,
 }
