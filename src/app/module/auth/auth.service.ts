@@ -185,11 +185,45 @@ const forgetPassword = async (email: string) => {
   sendEmail(sendEmailData)
 }
 
-const resetPasswrod = async(
+const resetPasswrod = async (
   token: string,
   payload: { email: string; newPassword: string },
 ) => {
-  console.log(token, payload)
+  const decoded = verifyToken(token, config.jwt_access_secret as string)
+
+  const { email, role } = decoded
+
+  const user = await User.isUserExistsByEmailOrNumber(payload.email)
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'user is not found')
+  }
+
+  if (user?.isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is deleted')
+  }
+
+  if (user?.isActive === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is blocked')
+  }
+
+  if (payload.email !== email) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'you are forbidden')
+  }
+
+  const newHashedPassword = await bcrypt.hash(
+    payload.newPassword,
+    config.bcrypt_salt_rounds as string,
+  )
+
+  await User.findOneAndUpdate(
+    { email: email, role: role },
+    {
+      password: newHashedPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  )
 }
 
 export const authService = {

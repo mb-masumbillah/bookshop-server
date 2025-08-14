@@ -3,6 +3,7 @@ import { catchAsync } from '../../../utils/catchAsync'
 import { StatusCodes } from 'http-status-codes'
 import sendResponse from '../../../utils/sendResponse'
 import config from '../../config'
+import { AppError } from '../../Error/AppError'
 
 const loginUser = catchAsync(async (req, res) => {
   const { accessToken, refreshToken, needsPasswordChange } =
@@ -67,6 +68,10 @@ const forgetPassword = catchAsync(async (req, res) => {
 
 const resetPasswrod = catchAsync(async (req, res) => {
   const token = req.headers.authorization
+
+  if(!token){
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'user is unauthorized')
+  }
 
   const result = await authService.resetPasswrod(token as string, req.body)
 
