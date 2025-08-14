@@ -6,6 +6,8 @@ import { createToken, verifyToken } from './auth.utils'
 import config from '../../config'
 import { JwtPayload } from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import sendEmail from '../../../utils/otp/sendEmail'
+import { TEmailSend } from '../../../utils/otp/opt.interface'
 
 const loginUserIntoService = async (payload: TLoginUser) => {
   let user = null
@@ -145,13 +147,50 @@ const refreshToken = async (token: string) => {
   }
 }
 
-const forgetPassword = async (email:string) =>{
-console.log(email)
+const forgetPassword = async (email: string) => {
+  const user = await User.isUserExistsByEmailOrNumber(email)
+
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'user is not exists')
+  }
+
+  if (user?.isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is deleted')
+  }
+
+  if (user?.isActive === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is blocked')
+  }
+
+  const jwtPayload = {
+    email: user?.email,
+    role: user?.role,
+  }
+
+  const resetToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    '2m',
+  )
+
+  const resetUILink = `${config.jwt_reset_ui_link}?email=${user?.email}&token=${resetToken}`
+
+  const sendEmailData = {
+    name: user?.name,
+    email: user?.email,
+    link: resetUILink,
+    expireInSeconds: 120,
+  } as TEmailSend
+
+  sendEmail(sendEmailData)
 }
+
+
+
 
 export const authService = {
   loginUserIntoService,
   changePassword,
   refreshToken,
-  forgetPassword
+  forgetPassword,
 }

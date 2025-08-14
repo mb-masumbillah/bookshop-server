@@ -6,6 +6,7 @@ import { OTP } from './otp.model'
 import { User } from '../user/user.model'
 import { AppError } from '../../Error/AppError'
 import sendEmail from '../../../utils/otp/sendEmail'
+import { TEmailSend } from '../../../utils/otp/opt.interface'
 
 const otpExpireSeconds = 60
 
@@ -35,9 +36,18 @@ const otpStoreIntoDB = async (password: string, payload: TOtp) => {
     await OTP.create(data)
   }
 
+  
   // Send OTP email
   try {
-    await sendEmail(payload.name, payload.email, otpCode, otpExpireSeconds)
+    const sendEmailData = {
+      name: payload?.name,
+      email: payload?.email,
+      otpCode: otpCode,
+      expireInSeconds: otpExpireSeconds,
+    } as TEmailSend
+
+    await sendEmail(sendEmailData)
+
   } catch (error) {
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
@@ -72,12 +82,15 @@ const resendOtpUpdateIntoDB = async (email: string) => {
   }
 
   try {
-    await sendEmail(
-      updatedOtp.name,
-      updatedOtp.email,
-      otpCode,
-      otpExpireSeconds,
-    )
+    const sendEmailData = {
+      name: updatedOtp?.name,
+      email: updatedOtp?.email,
+      otpCode: otpCode,
+      expireInSeconds: otpExpireSeconds,
+    } as TEmailSend
+
+    await sendEmail(sendEmailData)
+    
   } catch (error) {
     throw new AppError(
       StatusCodes.INTERNAL_SERVER_ERROR,
