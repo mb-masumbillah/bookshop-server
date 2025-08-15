@@ -8,7 +8,10 @@ export const userValidationSchema = z.object({
       .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
       .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
       .regex(/[0-9]/, 'Password must contain at least one number')
-      .regex(/[@$!%*?&]/, 'Password must contain at least one special character'),
+      .regex(
+        /[@$!%*?&]/,
+        'Password must contain at least one special character',
+      ),
 
     user: z.object({
       name: z.string().min(1, 'Name is required'),
@@ -18,4 +21,21 @@ export const userValidationSchema = z.object({
         .regex(/^\+\d{10,15}$/, 'Invalid contact number format'),
     }),
   }),
+})
+
+export const userUpdateValidationSchema = z.object({
+  body: z
+    .object({
+      user: z
+        .object({
+          name: z.string().min(1, 'Name is required').optional(),
+          email: z.email('Invalid email format').optional(),
+          contactNumbar: z
+            .string()
+            .regex(/^\+\d{10,15}$/, 'Invalid contact number format')
+            .optional(),
+        })
+        .strict(),
+    })
+    .strict(),
 })

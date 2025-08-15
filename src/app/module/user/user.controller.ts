@@ -29,4 +29,33 @@ const createUser = catchAsync(async (req, res) => {
   })
 })
 
-export const userController = { createUser }
+const updateUser = catchAsync(async (req, res) => {
+  const { email } = req.params; 
+  const {user} = req.body;  
+
+  const updatedUser = await userService.updateUserIntoDB(email, user);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'User update success',
+    data: updatedUser,
+  });
+});
+
+
+const deleteUser = catchAsync(async (req, res) => {
+  const { email } = req.params; 
+
+  const updatedUser = await userService.deleteUserIntoDB(email);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'User update success',
+    data: updatedUser,
+  });
+});
+
+
+export const userController = { createUser, updateUser, deleteUser }

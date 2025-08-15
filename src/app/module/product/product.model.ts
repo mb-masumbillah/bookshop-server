@@ -17,7 +17,8 @@ const computeFinalPrice = (
 ) => {
   if (discount.type === 'percent') {
     const pct = Math.min(Math.max(discount.value, 0), 100) // clamp 0–100
-    return Math.max(0, Math.round(price * (100 - pct)) / 100)
+    const discountedPrice = (price * (100 - pct)) / 100
+    return Math.max(0, Math.round(discountedPrice))
   }
   return Math.max(0, price - Math.max(discount.value, 0))
 }
@@ -135,11 +136,8 @@ ProductSchema.pre('validate', function (next) {
   next()
 })
 
-
-ProductSchema.statics.isProductExist = async function (slug:string) {
-  return await this.findOne({"meta?.slug": slug})
+ProductSchema.statics.isProductExist = async function (slug: string) {
+  return await this.findOne({ 'meta?.slug': slug })
 }
-
-
 
 export const Product = model<TProduct, ProductModel>('Book', ProductSchema)

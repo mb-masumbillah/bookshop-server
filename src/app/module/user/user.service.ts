@@ -102,6 +102,54 @@ const createUserIntoDB = async (mail: string, otp: string) => {
   }
 }
 
+const updateUserIntoDB = async (email: string, payload: Partial<TUser>) => {
+  const user = await User.isUserExistsByEmailOrNumber(email)
+  if (!user) {
+    throw new AppError(StatusCodes.CONFLICT, 'User is not exists')
+  }
+
+  if (user?.isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is deleted')
+  }
+
+  if (user?.isActive === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is blocked')
+  }
+
+  const result = await User.findOneAndUpdate({ email }, payload, {
+    new: true,
+    runValidators: true,
+  })
+  return result
+}
+
+const deleteUserIntoDB = async (email: string) => {
+  const user = await User.isUserExistsByEmailOrNumber(email)
+  if (!user) {
+    throw new AppError(StatusCodes.CONFLICT, 'User is not exists')
+  }
+
+  if (user?.isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is deleted')
+  }
+
+  if (user?.isActive === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user is blocked')
+  }
+
+  const deleteData: Partial<TUser> = {}
+  deleteData.isActive = 'blocked'
+  deleteData.isDeleted = true
+
+  const result = await User.findOneAndUpdate({ email }, deleteData, {
+    new: true,
+    runValidators: true,
+  })
+  return result
+}
+
 export const userService = {
   createUserIntoDB,
+  updateUserIntoDB,
+  deleteUserIntoDB,
 }
