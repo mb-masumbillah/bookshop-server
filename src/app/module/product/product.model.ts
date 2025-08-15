@@ -8,20 +8,19 @@ import {
   TRating,
 } from './product.interface'
 
+// ----- Helper: Compute Final Price -----
 const computeFinalPrice = (
   price: number,
-  discount?: { type: 'percent' | 'fixed'; value: number },
+  discount: { type: 'percent' | 'fixed'; value: number }
 ) => {
-  if (!discount) return price
-
   if (discount.type === 'percent') {
-    const pct = Math.max(Math.min(discount?.value, 100), 0)
+    const pct = Math.min(Math.max(discount.value, 0), 100) // clamp 0–100
     return Math.max(0, Math.round(price * (100 - pct)) / 100)
   }
-
-  return Math.max(0, price - Math.max(discount?.value, 0))
+  return Math.max(0, price - Math.max(discount.value, 0))
 }
 
+// ----- Sub-schemas -----
 const DimensionsSchema = new Schema<TDimensions>({
   widthCm: { type: Number, required: true },
   heightCm: { type: Number, required: true },
@@ -36,7 +35,7 @@ const RatingSchema = new Schema<TRating>({
 const DiscountSchema = new Schema<TDiscount>({
   type: { type: String, enum: ['percent', 'fixed'], required: true },
   value: { type: Number, required: true },
-  finalPrice: { type: Number }, // auto computed below
+  finalPrice: { type: Number },
 })
 
 const MetaSchema = new Schema<TMeta>({
@@ -50,6 +49,7 @@ const ActorRefSchema = new Schema<TActorRef>({
   name: { type: String },
 })
 
+// ----- Main Product Schema -----
 const ProductSchema = new Schema<TProduct>(
   {
     title: { type: String, required: true },
@@ -106,17 +106,24 @@ const ProductSchema = new Schema<TProduct>(
     createdBy: { type: ActorRefSchema, default: null },
     updatedBy: { type: ActorRefSchema, default: null },
   },
-  { timestamps: true }, // createdAt & updatedAt auto set
+  { timestamps: true }
 )
 
-
-
-
-
-
-
-
-
-
+// ----- Pre-save Hook -----
+ProductSchema.pre('save', function (next) {
+  if (this.discount) {
+    this.discount.finalPrice = computeFinalPrice(this.price, {
+      type: this.discount.type,
+      value: this.discount.value,
+    })
+  } else {
+    this.discount = {
+      type: 'fixed',
+      value: 0,
+      finalPrice: this.price,
+    } as TDiscount
+  }
+  next()
+})
 
 export const Product = model<TProduct>('Product', ProductSchema)

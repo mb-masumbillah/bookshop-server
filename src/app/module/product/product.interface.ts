@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 import { TAvailability, TDiscountType, TVisibility } from "./product.constant";
 
-
 export type TDimensions = {
   widthCm: number;
   heightCm: number;
@@ -15,27 +14,37 @@ export type TRating = {
 
 export type TDiscount = {
   type: TDiscountType;
-  value: number;     // percent: 0..100, fixed: 0..price
+  value: number;       // percent: 0..100, fixed: 0..price
   finalPrice?: number; // server will compute and store
 };
 
 export type TMeta = {
   seoTitle?: string;
   seoDescription?: string;
-  slug: string; // unique-ish url id
+  slug: string; // unique-ish url id (required in schema)
 };
 
 export type TActorRef = {
-  actorId: Types.ObjectId;
-  name: string;
+  actorId?: Types.ObjectId;
+  name?: string;
 };
 
 export type TProduct = {
+  // Required fields (no default in schema)
   title: string;
-  subtitle?: string;
   author: string;
+  category: string;
+  coverImage: string;
+  price: number;
+  currency: string; // default: "BDT"
+  stock: number;
+  availability: TAvailability;
+  meta: TMeta;
+
+  // Optional or has default values in schema
+  subtitle?: string;
   publisher?: string;
-  publicationDate?: string; // ISO date string
+  publicationDate?: string;
   isbn10?: string;
   isbn13?: string;
   edition?: string;
@@ -43,25 +52,17 @@ export type TProduct = {
   format?: string;
   pages?: number;
 
-  category: string;
   subCategory?: string;
   tags?: string[];
 
   summary?: string;
   description?: string;
 
-  coverImage: string;
   gallery?: string[];
-
-  price: number;
-  currency: string; // e.g. "BDT"
 
   discount?: TDiscount;
 
-  stock: number;
   sku?: string;
-  availability: TAvailability;
-
   dimensions?: TDimensions;
   weightGrams?: number;
 
@@ -71,8 +72,6 @@ export type TProduct = {
 
   rating?: TRating;
 
-  meta: TMeta;
-
   createdBy?: TActorRef;
   updatedBy?: TActorRef;
 
@@ -80,3 +79,5 @@ export type TProduct = {
   updatedAt?: string | Date;
   __v?: number;
 };
+
+
