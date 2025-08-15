@@ -7,11 +7,12 @@ import {
   TProduct,
   TRating,
 } from './product.interface'
+import slugify from 'slugify'
 
 // ----- Helper: Compute Final Price -----
 const computeFinalPrice = (
   price: number,
-  discount: { type: 'percent' | 'fixed'; value: number }
+  discount: { type: 'percent' | 'fixed'; value: number },
 ) => {
   if (discount.type === 'percent') {
     const pct = Math.min(Math.max(discount.value, 0), 100) // clamp 0–100
@@ -52,9 +53,23 @@ const ActorRefSchema = new Schema<TActorRef>({
 // ----- Main Product Schema -----
 const ProductSchema = new Schema<TProduct>(
   {
+    // ----- Required Fields -----
     title: { type: String, required: true },
-    subtitle: { type: String, default: '' },
     author: { type: String, required: true },
+    category: { type: String, required: true },
+    coverImage: { type: String, required: true },
+    price: { type: Number, required: true },
+    currency: { type: String, required: true, default: 'BDT' },
+    availability: {
+      type: String,
+      enum: ['in_stock', 'out_of_stock', 'preorder'],
+      required: true,
+      default: 'in_stock',
+    },
+    meta: { type: MetaSchema, required: true },
+
+    // ----- Defaults -----
+    subtitle: { type: String, default: '' },
     publisher: { type: String, default: '' },
     publicationDate: { type: String, default: '' },
     isbn10: { type: String, default: '' },
@@ -63,34 +78,15 @@ const ProductSchema = new Schema<TProduct>(
     language: { type: String, default: '' },
     format: { type: String, default: '' },
     pages: { type: Number, default: 0 },
-
-    category: { type: String, required: true },
     subCategory: { type: String, default: '' },
     tags: { type: [String], default: [] },
-
     summary: { type: String, default: '' },
     description: { type: String, default: '' },
-
-    coverImage: { type: String, required: true },
     gallery: { type: [String], default: [] },
-
-    price: { type: Number, required: true },
-    currency: { type: String, required: true, default: 'BDT' },
-
-    discount: { type: DiscountSchema, default: null },
-
-    stock: { type: Number, required: true, default: 0 },
+    stock: { type: Number, default: 0 },
     sku: { type: String, default: '' },
-    availability: {
-      type: String,
-      enum: ['in_stock', 'out_of_stock', 'preorder'],
-      required: true,
-      default: 'in_stock',
-    },
-
     dimensions: { type: DimensionsSchema, default: null },
     weightGrams: { type: Number, default: 0 },
-
     featured: { type: Boolean, default: false },
     bestseller: { type: Boolean, default: false },
     visibility: {
@@ -98,15 +94,12 @@ const ProductSchema = new Schema<TProduct>(
       enum: ['public', 'private'],
       default: 'public',
     },
-
     rating: { type: RatingSchema, default: () => ({ average: 0, count: 0 }) },
-
-    meta: { type: MetaSchema, required: true },
-
+    discount: { type: DiscountSchema, default: null },
     createdBy: { type: ActorRefSchema, default: null },
     updatedBy: { type: ActorRefSchema, default: null },
   },
-  { timestamps: true }
+  { timestamps: true },
 )
 
 // ----- Pre-save Hook -----
@@ -126,4 +119,19 @@ ProductSchema.pre('save', function (next) {
   next()
 })
 
-export const Product = model<TProduct>('Product', ProductSchema)
+ProductSchema.pre('validate', function (next) {
+  if (
+    !this.meta.slug ||
+    this.isModified('title') ||
+    this.isModified('author') ||
+    this.isModified('edition')
+  ) {
+    this.meta.slug = slugify(
+      `${this.title}-${this.author}-${this.edition || ''}`,
+      { lower: true },
+    )
+  }
+  next()
+})
+
+export const Product = model<TProduct>('Book', ProductSchema)

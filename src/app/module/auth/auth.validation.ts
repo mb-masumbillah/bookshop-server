@@ -1,6 +1,6 @@
 import z from 'zod'
 
-export const authValidationUser = z.object({
+const authValidationUser = z.object({
   body: z
     .object({
       contactNumber: z
@@ -26,3 +26,45 @@ export const authValidationUser = z.object({
       path: ['contactNumber'],
     }),
 })
+
+const changePasswordValidationSchema = z.object({
+  body: z.object({
+    oldPassword: z.string({ message: 'Old password is required.' }),
+    newPassword: z.string({ message: 'New Password is required' }),
+  }),
+})
+
+const refreshTokenValidationSchema = z.object({
+  cookies: z.object({
+    refreshToken: z.string({
+      message: 'Refresh Token is required',
+    }),
+  }),
+})
+
+const forgetTokenValidationSchema = z.object({
+  body: z.object({
+    email: z.email({
+      message: 'id is required',
+    }),
+  }),
+})
+
+const resetPasswordValidationSchema = z.object({
+  body: z.object({
+    id: z.string({
+      message: 'User id is required!',
+    }),
+    newPassword: z.string({
+      message: 'User password is required!',
+    }),
+  }),
+})
+
+export const authValidation = {
+  authValidationUser,
+  changePasswordValidationSchema,
+  refreshTokenValidationSchema,
+  forgetTokenValidationSchema,
+  resetPasswordValidationSchema,
+}

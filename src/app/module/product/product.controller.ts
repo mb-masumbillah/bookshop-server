@@ -4,9 +4,9 @@ import sendResponse from '../../../utils/sendResponse'
 import { productService } from './product.service'
 
 const createProduct = catchAsync(async (req, res) => {
-  const { product } = req.body
+  const { book } = req.body
 
-  const result = await productService.createProductIntoDB(product)
+  const result = await productService.createProductIntoDB(book)
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
