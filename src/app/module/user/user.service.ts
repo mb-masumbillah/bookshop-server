@@ -103,7 +103,12 @@ const createUserIntoDB = async (mail: string, otp: string) => {
 }
 
 const updateUserIntoDB = async (userId: string, payload: Partial<TUser>) => {
-  const user = await User.findById({_id: userId})
+  if (!userId) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user id unauthorized')
+  }
+
+  const user = await User.findById({ _id: userId })
+
   if (!user) {
     throw new AppError(StatusCodes.CONFLICT, 'User is not exists')
   }
@@ -116,7 +121,7 @@ const updateUserIntoDB = async (userId: string, payload: Partial<TUser>) => {
     throw new AppError(StatusCodes.FORBIDDEN, 'user is blocked')
   }
 
-  const result = await User.findOneAndUpdate({ userId }, payload, {
+  const result = await User.findOneAndUpdate({ _id: userId }, payload, {
     new: true,
     runValidators: true,
   })
@@ -124,7 +129,11 @@ const updateUserIntoDB = async (userId: string, payload: Partial<TUser>) => {
 }
 
 const deleteUserIntoDB = async (userId: string) => {
-  const user = await User.findById(userId)
+  if (!userId) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'user id unauthorized')
+  }
+
+  const user = await User.findById({ _id: userId })
   if (!user) {
     throw new AppError(StatusCodes.CONFLICT, 'User is not exists')
   }
@@ -141,7 +150,7 @@ const deleteUserIntoDB = async (userId: string) => {
   deleteData.isActive = 'blocked'
   deleteData.isDeleted = true
 
-  const result = await User.findOneAndUpdate({ userId }, deleteData, {
+  const result = await User.findOneAndUpdate({ _id: userId }, deleteData, {
     new: true,
     runValidators: true,
   })

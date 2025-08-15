@@ -137,6 +137,16 @@ ProductSchema.pre('validate', function (next) {
   next()
 })
 
+ProductSchema.pre('validate', function (next) {
+  if (this.stock > 0) {
+    this.availability = 'in_stock';
+  } else {
+    this.availability = 'out_of_stock';
+  }
+  next();
+});
+
+
 ProductSchema.statics.isProductExist = async function (slug: string) {
   return await this.findOne({ 'meta?.slug': slug })
 }

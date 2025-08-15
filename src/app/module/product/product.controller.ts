@@ -17,7 +17,7 @@ const createProduct = catchAsync(async (req, res) => {
 })
 
 const updateProduct = catchAsync(async (req, res) => {
-  const { productId } = req.params; // যেটা আপডেট করতে চাচ্ছেন
+  const { productId } = req.params; 
   const book  = req.body;
 
 
@@ -31,7 +31,24 @@ const updateProduct = catchAsync(async (req, res) => {
   });
 });
 
+
+const deleteProduct = catchAsync(async (req, res) => {
+  const { productId } = req.params; 
+
+  const updatedUser = await productService.deleteProductIntoDB(productId);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'User update success',
+    data: updatedUser,
+  });
+});
+
+
+
 export const productController = {
   createProduct,
-  updateProduct
+  updateProduct,
+  deleteProduct
 }
