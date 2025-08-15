@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
 import {
+  ProductModel,
   TActorRef,
   TDimensions,
   TDiscount,
@@ -46,12 +47,12 @@ const MetaSchema = new Schema<TMeta>({
 })
 
 const ActorRefSchema = new Schema<TActorRef>({
-  actorId: { type: Schema.Types.ObjectId, ref: 'User' },
+  id: { type: Schema.Types.ObjectId, ref: 'User' },
   name: { type: String },
 })
 
 // ----- Main Product Schema -----
-const ProductSchema = new Schema<TProduct>(
+const ProductSchema = new Schema<TProduct, ProductModel>(
   {
     // ----- Required Fields -----
     title: { type: String, required: true },
@@ -134,4 +135,11 @@ ProductSchema.pre('validate', function (next) {
   next()
 })
 
-export const Product = model<TProduct>('Book', ProductSchema)
+
+ProductSchema.statics.isProductExist = async function (slug:string) {
+  return await this.findOne({"meta?.slug": slug})
+}
+
+
+
+export const Product = model<TProduct, ProductModel>('Book', ProductSchema)
