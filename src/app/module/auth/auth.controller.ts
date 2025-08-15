@@ -69,7 +69,7 @@ const forgetPassword = catchAsync(async (req, res) => {
 const resetPasswrod = catchAsync(async (req, res) => {
   const token = req.headers.authorization
 
-  if(!token){
+  if (!token) {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'user is unauthorized')
   }
 
@@ -88,5 +88,5 @@ export const authController = {
   changePassword,
   refreshToken,
   forgetPassword,
-  resetPasswrod
+  resetPasswrod,
 }

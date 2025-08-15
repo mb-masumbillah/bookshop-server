@@ -13,11 +13,11 @@ router.post(
 )
 
 router.patch(
-  '/:email',
+  '/:userId',
   validationRequest(userUpdateValidationSchema),
   userController.updateUser,
 )
 
-router.delete('/:email', userController.deleteUser)
+router.delete('/:userId', userController.deleteUser)
 
 export const userRoute = router

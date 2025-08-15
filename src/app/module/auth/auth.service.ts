@@ -170,7 +170,7 @@ const forgetPassword = async (email: string) => {
   const resetToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    '2m',
+    '10m',
   )
 
   const resetUILink = `${config.jwt_reset_ui_link}?email=${user?.email}&token=${resetToken}`
@@ -213,8 +213,10 @@ const resetPasswrod = async (
 
   const newHashedPassword = await bcrypt.hash(
     payload.newPassword,
-    config.bcrypt_salt_rounds as string,
+    Number(config.bcrypt_salt_rounds),
   )
+
+  console.log(newHashedPassword)
 
   await User.findOneAndUpdate(
     { email: email, role: role },

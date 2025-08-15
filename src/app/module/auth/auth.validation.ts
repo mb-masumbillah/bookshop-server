@@ -52,7 +52,7 @@ const forgetTokenValidationSchema = z.object({
 
 const resetPasswordValidationSchema = z.object({
   body: z.object({
-    id: z.string({
+    email: z.string({
       message: 'User id is required!',
     }),
     newPassword: z.string({

@@ -13,9 +13,25 @@ const createProduct = catchAsync(async (req, res) => {
     success: true,
     message: 'productData create success',
     data: result,
-  })
+  }) 
 })
+
+const updateProduct = catchAsync(async (req, res) => {
+  const { productId } = req.params; // যেটা আপডেট করতে চাচ্ছেন
+  const book  = req.body;
+
+
+  const updatedProduct = await productService.updateProductIntoDB(productId, book);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Product update success',
+    data: updatedProduct,
+  });
+});
 
 export const productController = {
   createProduct,
+  updateProduct
 }

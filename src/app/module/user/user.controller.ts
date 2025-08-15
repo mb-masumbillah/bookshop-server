@@ -30,10 +30,10 @@ const createUser = catchAsync(async (req, res) => {
 })
 
 const updateUser = catchAsync(async (req, res) => {
-  const { email } = req.params; 
+  const { userId } = req.params; 
   const {user} = req.body;  
 
-  const updatedUser = await userService.updateUserIntoDB(email, user);
+  const updatedUser = await userService.updateUserIntoDB(userId, user);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -45,9 +45,9 @@ const updateUser = catchAsync(async (req, res) => {
 
 
 const deleteUser = catchAsync(async (req, res) => {
-  const { email } = req.params; 
+  const { userId } = req.params; 
 
-  const updatedUser = await userService.deleteUserIntoDB(email);
+  const updatedUser = await userService.deleteUserIntoDB(userId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,

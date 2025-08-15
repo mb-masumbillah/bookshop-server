@@ -77,6 +77,9 @@ export type TProduct = {
 
   createdAt?: string | Date
   updatedAt?: string | Date
+
+  isDeleted: boolean
+
   __v?: number
 }
 

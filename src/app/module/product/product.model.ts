@@ -100,6 +100,7 @@ const ProductSchema = new Schema<TProduct, ProductModel>(
     discount: { type: DiscountSchema, default: null },
     createdBy: { type: ActorRefSchema, default: null },
     updatedBy: { type: ActorRefSchema, default: null },
+    isDeleted: { type: Boolean, default: false }
   },
   { timestamps: true },
 )
